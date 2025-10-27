@@ -18,9 +18,11 @@ EduCopilot is an innovative AI education platform that delivers personalized lea
 ## Quick Start
 ## Structure
 
+```plaintext
 edu-copilot/
 |── README.md # 项目总览文档
 |── requirements.txt # Python依赖库清单
+```
 
 ## Acknowledgement
 ## Citation
