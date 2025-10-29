@@ -53,22 +53,22 @@ Generated 5000 samples...
 
 === Dataset Statistics ===
 Total samples: 5000
-Samples with input: 894 (17.9%)
+Samples with input: 914 (18.3%)
 
 Topic distribution:
-  - Physics: 983 (19.7%)
-  - Literature: 973 (19.5%)
-  - Mathematics: 1078 (21.6%)
-  - Computer Science: 969 (19.4%)
-  - History: 997 (19.9%)
+  - Computer Science: 995 (19.9%)
+  - Mathematics: 965 (19.3%)
+  - Literature: 998 (20.0%)
+  - Physics: 1042 (20.8%)
+  - History: 1000 (20.0%)
 
 Difficulty distribution:
-  - easy: 1617 (32.3%)
-  - hard: 1659 (33.2%)
-  - medium: 1724 (34.5%)
+  - easy: 1618 (32.4%)
+  - hard: 1655 (33.1%)
+  - medium: 1727 (34.5%)
 
-Average instruction length: 73.7 characters
-Average output length: 141.5 characters
+Average instruction length: 73.0 characters
+Average output length: 143.2 characters
 
 Dataset saved to: /Users/benxiang/Desktop/高级自然语言处理/proj/Edu-Copilot/data/edu_copilot_sft_data.json
 Also saved as JSONL format: /Users/benxiang/Desktop/高级自然语言处理/proj/Edu-Copilot/data/edu_copilot_sft_data.jsonl

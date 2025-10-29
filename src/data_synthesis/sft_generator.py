@@ -154,10 +154,7 @@ class SFTGenerator:
         # Randomly select a concept
         concept = random.choice(topic_info["concepts"])
 
-        # 50% chance to select a second concept for comparative analysis
-        concept2 = None
-        if random.random() > 0.5 and len(topic_info["concepts"]) > 1:
-            concept2 = random.choice([c for c in topic_info["concepts"] if c != concept])
+        concept2 = random.choice([c for c in topic_info["concepts"] if c != concept])
 
         # Randomly select difficulty level
         difficulty = random.choice(list(self.difficulty_templates.keys()))
