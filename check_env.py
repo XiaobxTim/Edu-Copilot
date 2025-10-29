@@ -39,7 +39,13 @@ def create_directories():
     directories = [
         "data",
         "src/data_synthesis",
+        "src/model_training",
+        "src/agents",
+        "src/utils",
         "models",
+        "scripts",
+        "configs",
+        "docs",
         "logs"
     ]
     

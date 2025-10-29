@@ -43,6 +43,7 @@ edu-copilot/
 |-- README.md
 |-- check_env.py
 |-- requirements.txt
+|-- configs/
 |-- data/
 | |--edu_copilot_sft_data.json
 | |--edu_copilot_sft_data.jsonl
@@ -51,8 +52,14 @@ edu-copilot/
 | | |-- sft_generator.py
 | | |-- preference_generator.py
 | | |-- data_filter.py
+| |-- model_training/
+| |-- agents/
+| |-- utils/
 |-- scripts/
 | |-- run_sft_generator.sh
+|-- models/
+|-- docs/
+|-- logs/
 
 ```
 
