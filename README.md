@@ -31,9 +31,13 @@ python check_env.py
 **Step 1: Data Synthesis**
 ```
 chmod +x ./scripts/run_sft_generator.sh
+chmod +x ./scripts/run_preference_generator.sh
 
 # sft data generator
 ./scripts/run_sft_generator.sh
+
+# preference generator
+./scripts/run_preference_generator.sh
 ```
 
 ## Structure
@@ -45,8 +49,10 @@ edu-copilot/
 |-- requirements.txt
 |-- configs/
 |-- data/
-| |--edu_copilot_sft_data.json
-| |--edu_copilot_sft_data.jsonl
+| |-- edu_copilot_sft_data.json
+| |-- edu_copilot_sft_data.jsonl
+| |-- edu_copilot_preference_data.json
+| |-- edu_copilot_preference_data.jsonl
 |-- src/
 | |-- data_synthesis/
 | | |-- sft_generator.py
@@ -57,6 +63,7 @@ edu-copilot/
 | |-- utils/
 |-- scripts/
 | |-- run_sft_generator.sh
+| |-- run_preference_generator.sh
 |-- models/
 |-- docs/
 |-- logs/

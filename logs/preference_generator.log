@@ -1,0 +1,86 @@
+Loading SFT data from data/edu_copilot_sft_data.json...
+Successfully loaded 5000 SFT samples
+SFT dataset contains 5000 samples
+Generating 5000 preference samples...
+Generating 5000 synthetic preference data samples...
+Generated 100 preference samples
+Generated 200 preference samples
+Generated 300 preference samples
+Generated 400 preference samples
+Generated 500 preference samples
+Generated 600 preference samples
+Generated 700 preference samples
+Generated 800 preference samples
+Generated 900 preference samples
+Generated 1000 preference samples
+Generated 1100 preference samples
+Generated 1200 preference samples
+Generated 1300 preference samples
+Generated 1400 preference samples
+Generated 1500 preference samples
+Generated 1600 preference samples
+Generated 1700 preference samples
+Generated 1800 preference samples
+Generated 1900 preference samples
+Generated 2000 preference samples
+Generated 2100 preference samples
+Generated 2200 preference samples
+Generated 2300 preference samples
+Generated 2400 preference samples
+Generated 2500 preference samples
+Generated 2600 preference samples
+Generated 2700 preference samples
+Generated 2800 preference samples
+Generated 2900 preference samples
+Generated 3000 preference samples
+Generated 3100 preference samples
+Generated 3200 preference samples
+Generated 3300 preference samples
+Generated 3400 preference samples
+Generated 3500 preference samples
+Generated 3600 preference samples
+Generated 3700 preference samples
+Generated 3800 preference samples
+Generated 3900 preference samples
+Generated 4000 preference samples
+Generated 4100 preference samples
+Generated 4200 preference samples
+Generated 4300 preference samples
+Generated 4400 preference samples
+Generated 4500 preference samples
+Generated 4600 preference samples
+Generated 4700 preference samples
+Generated 4800 preference samples
+Generated 4900 preference samples
+Generated 5000 preference samples
+
+=== Preference Data Generation Statistics ===
+Total samples: 5000
+
+Topic distribution:
+  - Physics: 1032 samples (20.6%)
+  - Literature: 1016 samples (20.3%)
+  - History: 998 samples (20.0%)
+  - Mathematics: 984 samples (19.7%)
+  - Computer Science: 970 samples (19.4%)
+
+Quality difference statistics:
+  - Average difference: 0.185
+  - Minimum difference: 0.000
+  - Maximum difference: 0.605
+  - Samples with difference < 0.3: 3740 (74.8%)
+  - Samples with difference 0.3-0.6: 1259 (25.2%)
+  - Samples with difference >= 0.6: 1 (0.0%)
+
+Preference criteria usage frequency:
+  - helpfulness: 2128 times
+  - completeness: 2120 times
+  - depth: 2095 times
+  - educational_value: 2095 times
+  - clarity: 2063 times
+  - accuracy: 2030 times
+
+Dataset saved to: data/edu_copilot_preference_data.json
+Preference data saved to: data/edu_copilot_preference_data.json
+Also saved as JSONL format: data/edu_copilot_preference_data.jsonl
+Preference data generation completed successfully!
