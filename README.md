@@ -34,6 +34,7 @@ chmod +x ./scripts/run_sft_generator.sh
 chmod +x ./scripts/run_preference_generator.sh
 
 # sft data generator
+export DEEPSEEK_API_KEY="sk-5544d39338ba4617b8aea25b76db7f43"
 ./scripts/run_sft_generator.sh
 
 # preference generator

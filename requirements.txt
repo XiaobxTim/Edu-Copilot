@@ -3,3 +3,4 @@ huggingface-hub
 numpy
 pyarrow
 tqdm
+openai

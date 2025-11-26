@@ -3,78 +3,75 @@ import random
 from typing import List, Dict, Any
 from datasets import Dataset
 import os
+from tqdm import tqdm
+from openai import OpenAI
 
 class SFTGenerator:
     '''
     A class to generate Supervised Fine-Tuning (SFT) data for educational purposes.
     '''
 
-    def __init__(self):
+    def __init__(self, api_key=None, model="deepseek-chat"):
+        self.client = OpenAI(
+            api_key=api_key or os.environ.get("DEEPSEEK_API_KEY"),
+            base_url="https://api.deepseek.com/v1" 
+        )
+        self.model_name = model
+
         # seed instructions for reproducibility
         self.seed_instructions = [
             # Basic concept explanation
             {
                 "instruction": "Explain the basic concept of {concept}",
                 "input": "",
-                "output": "{concept} is an important concept in the field of {topic}, which refers to..."
             },
             {
                 "instruction": "What is {concept}? Please explain in simple terms",
                 "input": "",
-                "output": "Simply put, {concept} is..."
             },
             {
                 "instruction": "Explain the definition and characteristics of {concept} in detail",
                 "input": "",
-                "output": "The definition of {concept} is... Its main characteristics include..."
             },
             
             # Comparative analysis
             {
                 "instruction": "Compare the similarities and differences between {concept1} and {concept2}",
                 "input": "",
-                "output": "{concept1} and {concept2} are both important concepts in {topic}.\nSimilarities:...\nDifferences:..."
             },
             {
                 "instruction": "What are the relationships and differences between {concept1} and {concept2}?",
                 "input": "",
-                "output": "The relationship between {concept1} and {concept2} lies in... The main differences are..."
             },
             
             # Practical application
             {
                 "instruction": "Give an example of {concept} in practical application",
                 "input": "",
-                "output": "A typical application of {concept} in practice is..."
             },
             {
                 "instruction": "How to use {concept} to solve {problem_type} problems?",
                 "input": "Specific problem description: {problem_desc}",
-                "output": "Steps to solve {problem_type} problems using {concept}:\n1. ...\n2. ...\n3. ..."
             },
             
             # Learning methods
             {
                 "instruction": "How to learn {concept} efficiently?",
                 "input": "",
-                "output": "Efficient methods for learning {concept} include:\n1. ...\n2. ...\n3. ..."
             },
             {
                 "instruction": "Design a study plan for {concept}",
                 "input": "Study duration: {duration}",
-                "output": "A {duration} study plan for {concept}:\nWeek 1:...\nWeek 2:...\nWeek 3:..."
             },
             
             # Q&A
             {
                 "instruction": "Answer common questions about {concept}: {question}",
                 "input": "",
-                "output": "Regarding this question about {concept}, the answer is..."
             },
             {
                 "instruction": "Solve this {concept}-related problem: {problem}",
                 "input": "",
-                "output": "Let's solve this {concept} problem. First... then... finally..."
             }
         ]
 
@@ -87,7 +84,7 @@ class SFTGenerator:
                     "How to find the eigenvalues of this matrix?",
                     "What's the solution to this probability problem?"
                 ],
-                "problem_types": ["Derivative Problems", "Integration Problems", "Matrix Operations", "Probability Calculations"]  # 修复：problems_type -> problem_types
+                "problem_types": ["Derivative Problems", "Integration Problems", "Matrix Operations", "Probability Calculations"]
             },
             "Computer Science": {
                 "concepts": ["Programming", "Algorithms", "Data Structures", "Machine Learning", "Databases", "Operating Systems", "Computer Networks"],
@@ -131,21 +128,84 @@ class SFTGenerator:
         self.difficulty_templates = {
             "easy": {
                 "prefix": ["Explain simply", "Basic concept", "Introductory knowledge"],
-                "explanation_style": "Simple and easy-to-understand language"
+                "explanation_style": "Use simple and easy-to-understand language, suitable for beginners"
             },
             "medium": {
                 "prefix": ["Explain in detail", "In-depth analysis", "Systematic explanation"],
-                "explanation_style": "More professional terminology"
+                "explanation_style": "Use more professional terminology and detailed explanations"
             },
             "hard": {
                 "prefix": ["Deep dive", "Professional analysis", "Academic research"],
-                "explanation_style": "Professional and in-depth academic language"
+                "explanation_style": "Use professional and in-depth academic language with advanced concepts"
             }
         }
 
+    def call_llm(self, instruction: str, input_text: str, difficulty: str, concept: str, topic: str) -> str:
+        """
+        Call the LLM API to generate high-quality output
+        """
+        # Prepare the prompt with specific requirements
+        explanation_style = self.difficulty_templates[difficulty]["explanation_style"]
+        
+        system_prompt = f"""You are an expert educator in {topic}. Provide a high-quality, accurate, and pedagogically sound explanation for the given instruction.
+
+Difficulty Level: {difficulty.upper()}
+Style Requirement: {explanation_style}
+Concept: {concept}
+Topic: {topic}
+
+Please provide a comprehensive, well-structured response that is appropriate for the specified difficulty level."""
+
+        if input_text.strip():
+            user_prompt = f"Instruction: {instruction}\nInput: {input_text}\nPlease provide a detailed answer:"
+        else:
+            user_prompt = f"Instruction: {instruction}\nPlease provide a detailed answer:"
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.7,
+                max_tokens=1500,
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            print(f"API call failed: {e}")
+            # Return a fallback response
+            return self._generate_fallback_output(instruction, input_text, difficulty, concept, topic)
+
+    def _generate_fallback_output(self, instruction: str, input_text: str, difficulty: str, concept: str, topic: str) -> str:
+        """
+        Generate a fallback output when API call fails
+        """
+        base_output = f"This is a {difficulty} level explanation about {concept} in {topic}.\n\n"
+        
+        if "explain" in instruction.lower() or "what is" in instruction.lower():
+            base_output += f"{concept} is an important concept in {topic}. "
+            if difficulty == "easy":
+                base_output += f"In simple terms, {concept} can be understood as a fundamental idea that helps us understand {topic} better."
+            elif difficulty == "medium":
+                base_output += f"From a technical perspective, {concept} involves key principles and applications that are essential for understanding {topic}."
+            else:
+                base_output += f"At an advanced level, {concept} encompasses complex theoretical frameworks and cutting-edge research in {topic}."
+        
+        elif "compare" in instruction.lower() or "difference" in instruction.lower():
+            base_output += f"When comparing concepts in {topic}, it's important to consider both similarities and differences."
+        
+        elif "example" in instruction.lower() or "application" in instruction.lower():
+            base_output += f"Here's a practical example of how {concept} is applied in real-world scenarios."
+        
+        elif "learn" in instruction.lower() or "study" in instruction.lower():
+            base_output += f"Here are effective strategies for learning {concept} efficiently."
+        
+        return base_output
+
     def generate_single_sample(self) -> Dict[str, Any]:
         '''
-        Generate a single SFT data sample
+        Generate a single SFT data sample using API for output
         '''
         # Randomly select a topic
         topic = random.choice(list(self.education_knowledge_base.keys()))
@@ -153,7 +213,6 @@ class SFTGenerator:
 
         # Randomly select a concept
         concept = random.choice(topic_info["concepts"])
-
         concept2 = random.choice([c for c in topic_info["concepts"] if c != concept])
 
         # Randomly select difficulty level
@@ -162,12 +221,12 @@ class SFTGenerator:
         # Randomly select a seed template
         seed_template = random.choice(self.seed_instructions)
 
-        # Fill in the template
+        # Fill in the template for instruction
         instruction = seed_template["instruction"]
-        if concept2:
-            instruction = instruction.replace("{concept1}", concept).replace("{concept2}", concept2).replace("{topic}", topic)
-        else:
-            instruction = instruction.replace("{concept}", concept).replace("{topic}", topic)
+        instruction = instruction.replace("{concept}", concept)
+        if "{concept1}" in instruction and "{concept2}" in instruction:
+            instruction = instruction.replace("{concept1}", concept).replace("{concept2}", concept2)
+        instruction = instruction.replace("{topic}", topic)
 
         # Add difficulty prefix
         difficulty_prefix = random.choice(self.difficulty_templates[difficulty]["prefix"])
@@ -176,31 +235,25 @@ class SFTGenerator:
         # Fill in input
         input_text = seed_template["input"]
         if input_text:
-            # Fill input template
             if "{problem_type}" in input_text:
-                problem_type = random.choice(topic_info["problem_types"])
-                input_text = input_text.replace("{problem_type}", problem_type)
+                input_text = input_text.replace("{problem_type}", random.choice(topic_info["problem_types"]))
             
             if "{problem_desc}" in input_text:
-                problem_desc = f"A specific problem example about {concept}"
-                input_text = input_text.replace("{problem_desc}", problem_desc)
+                input_text = input_text.replace("{problem_desc}", f"A specific problem example about {concept}")
             
             if "{duration}" in input_text:
-                duration = f"{random.randint(1, 4)} weeks"
-                input_text = input_text.replace("{duration}", duration)
+                input_text = input_text.replace("{duration}", f"{random.randint(1, 4)} weeks")
             
             if "{question}" in input_text:
-                question = random.choice(topic_info["questions"])
-                input_text = input_text.replace("{question}", question)
+                input_text = input_text.replace("{question}", random.choice(topic_info["questions"]))
             
             if "{problem}" in input_text:
-                problem = f"A specific application problem of {concept}"
-                input_text = input_text.replace("{problem}", problem)
+                input_text = input_text.replace("{problem}", f"A specific application problem of {concept}")
         else:
             input_text = ""
 
-        # Generate output
-        output = self._generate_output(seed_template["output"], concept, concept2, topic, difficulty)
+        # Generate output using API
+        output = self.call_llm(instruction, input_text, difficulty, concept, topic)
 
         return {
             "instruction": instruction,
@@ -210,104 +263,23 @@ class SFTGenerator:
             "concept": concept,
             "concept2": concept2 if concept2 else "",
             "difficulty": difficulty,
-            "template_type": seed_template["instruction"][:20] + "..."  # Record template type used
+            "template_type": seed_template["instruction"][:20] + "..."
         }
-    
-    def _generate_output(self, output_template: str, concept: str, concept2: str, topic: str, difficulty: str) -> str:
-        '''
-        Generate output text based on the template and parameters
-        '''
-        output = output_template
 
-        # Replace placeholders
-        output = output.replace("{concept}", concept).replace("{topic}", topic)
-        if concept2:
-            output = output.replace("{concept1}", concept).replace("{concept2}", concept2)
-        
-        # Adjust output style and content depth based on difficulty
-        output = self._adjust_output_by_difficulty(output, concept, difficulty)
-
-        # Replace other placeholders if any
-        if "{problem_type}" in output:
-            problem_type = random.choice(self.education_knowledge_base[topic]["problem_types"])
-            output = output.replace("{problem_type}", problem_type)
-
-        if "{problem_desc}" in output:
-            problem_desc = f"A specific problem example about {concept}"
-            output = output.replace("{problem_desc}", problem_desc)
-        
-        if "{question}" in output:
-            question = random.choice(self.education_knowledge_base[topic]["questions"])
-            output = output.replace("{question}", question)
-        
-        if "{problem}" in output:
-            problem = f"A specific application problem of {concept}"
-            output = output.replace("{problem}", problem)
-        
-        if "{duration}" in output:
-            duration = f"{random.randint(1, 4)} weeks"
-            output = output.replace("{duration}", duration)
-
-        return output
-    
-    def _adjust_output_by_difficulty(self, output: str, concept: str, difficulty: str) -> str:
-        '''
-        Adjust the output content based on the difficulty level
-        '''
-        explanation_style = self.difficulty_templates[difficulty]["explanation_style"]
-
-        if difficulty == "easy":
-            # Easy difficulty: Basic explanation, avoid professional terminology
-            output = output + f"\n\nSimply put, {concept} is..."
-            
-            # Add simple examples
-            examples = [
-                f"\n\nFor example: it's like...",
-                f"\n\nFor instance, in daily life...",
-                f"\n\nA simple example is..."
-            ]
-            if random.random() > 0.5:
-                output += random.choice(examples)
-                
-        elif difficulty == "medium":
-            # Medium difficulty: Detailed explanation with some professional content
-            output = output + f"\n\nFrom a professional perspective, {concept} involves..."
-            
-            # Add key points
-            key_points = [
-                f"\n\nKey point 1:...",
-                f"\n\nImportant aspect:...",
-                f"\n\nSpecial attention should be paid to:..."
-            ]
-            if random.random() > 0.7:
-                output += random.choice(key_points)
-                
-        else:  # hard
-            # Hard difficulty: In-depth analysis with academic discussion
-            output = output + f"\n\nIn academic research, recent advances in {concept} include..."
-            
-            # Add in-depth analysis
-            analyses = [
-                f"\n\nFrom a theoretical perspective...",
-                f"\n\nRelated research shows that...",
-                f"\n\nThere are different views in academia..."
-            ]
-            if random.random() > 0.5:
-                output += random.choice(analyses)
-        
-        return output
-    
     def generate_sft_data(self, num_samples: int) -> List[Dict[str, Any]]:
         '''
         Generate specified number of SFT data samples
         '''
         sft_data = []
-        for i in range(num_samples):
-            if (i + 1) % 100 == 0:
-                print(f"Generated {i + 1} samples...")
+        for i in tqdm(range(num_samples)):
+            print(f"Generated {i + 1}/{num_samples} samples...")
 
-            sample = self.generate_single_sample()
-            sft_data.append(sample)
+            try:
+                sample = self.generate_single_sample()
+                sft_data.append(sample)
+            except Exception as e:
+                print(f"Error generating sample {i+1}: {e}")
+                continue
 
         # Convert to HuggingFace Dataset format
         dataset = Dataset.from_list(sft_data)
@@ -354,7 +326,7 @@ class SFTGenerator:
         print(f"\nAverage instruction length: {avg_instruction_len:.1f} characters")
         print(f"Average output length: {avg_output_len:.1f} characters")
 
-    def save_dataset(self, dataset: Dataset, filepath: str = "alpaca_sft_data.json"):
+    def save_dataset(self, dataset: Dataset, filepath: str = "edu_copilot_sft_data.json"):
         '''
         Save the dataset to a JSON file
         '''
@@ -385,30 +357,36 @@ def get_project_root():
     """
     Get the project root directory based on the current file location
     """
-    # Get the directory of the current script
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    
     project_root = os.path.dirname(os.path.dirname(current_dir))
     return project_root
 
 def main():
     '''
-    Generate SFT dataset
+    Generate SFT dataset using API
     '''
-    generator = SFTGenerator()
+    # Initialize generator with API credentials
+    generator = SFTGenerator(
+        api_key=os.environ.get("DEEPSEEK_API_KEY"),
+        model=os.environ.get("MODEL_NAME", "deepseek-chat")
+    )
 
-    # Generate dataset
-    num_samples = 5000  # Specify the number of samples to generate
+    # Generate dataset (start with smaller number for testing)
+    num_samples = 5000
+    print(f"Generating {num_samples} samples using API...")
     dataset = generator.generate_sft_data(num_samples)
 
     # Save dataset
     project_root = get_project_root()
-    filepath = os.path.join(project_root, "data", "edu_copilot_sft_data.json")
+    filepath = os.path.join(project_root, "data", "edu_copilot_sft_data_api.json")
     generator.save_dataset(dataset, filepath)
 
+    print(f"\n=== Generation Complete ===")
+    print(f"Successfully generated {len(dataset)} samples")
+    
     return dataset
 
 if __name__ == "__main__":
-    # Generate complete dataset (uncomment to run)
-    print("\n=== Generating Complete Dataset ===")
+    print("\n=== Generating Dataset ===")
+    print("Note: Make sure DEEPSEEK_API_KEY environment variable is set")
     main()
