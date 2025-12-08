@@ -32,13 +32,20 @@ python check_env.py
 ```
 chmod +x ./scripts/run_sft_generator.sh
 chmod +x ./scripts/run_preference_generator.sh
+chmod +x ./scripts/run_data_filter.sh
 
 # sft data generator
 export DEEPSEEK_API_KEY="you api key"
-./scripts/run_sft_generator.sh
+./scripts/run_sft_generator.sh (--overwrite) # depend on whether overwriting exist data
 
 # preference generator
-./scripts/run_preference_generator.sh
+./scripts/run_preference_generator.sh (--overwrite) # depend on whether overwriting exist data
+
+# data filter
+export HF_ENDPOINT=https://hf-mirror.com
+git config --global credential.helper store
+huggingface-cli login --token XXX(your access token)
+./scripts/run_data_filter.sh
 ```
 
 ## Structure
@@ -54,6 +61,8 @@ edu-copilot/
 | |-- edu_copilot_sft_data.jsonl
 | |-- edu_copilot_preference_data.json
 | |-- edu_copilot_preference_data.jsonl
+| |-- filtered_preference_data,json
+| |-- filtered_sft_data.json
 |-- src/
 | |-- data_synthesis/
 | | |-- sft_generator.py
@@ -68,6 +77,8 @@ edu-copilot/
 |-- models/
 |-- docs/
 |-- logs/
+| |-- sft_generator.log
+| |-- preference_generator.log
 
 ```
 

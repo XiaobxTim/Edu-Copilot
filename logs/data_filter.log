@@ -1,0 +1,70 @@
+=== Original Dataset Analysis ===
+
+=== SFT Data Quality Analysis ===
+Average text length: 5772.6 characters
+Min length: 219, Max length: 9217
+
+Topic distribution:
+  Literature: 1041 (20.8%)
+  History: 1015 (20.3%)
+  Physics: 1004 (20.1%)
+  Mathematics: 991 (19.8%)
+  Computer Science: 949 (19.0%)
+
+Difficulty distribution:
+  hard: 1696 (33.9%)
+  easy: 1665 (33.3%)
+  medium: 1639 (32.8%)
+
+=== Preference Data Quality Analysis ===
+Average text length: 6507.2 characters
+Min length: 293, Max length: 11819
+
+Topic distribution:
+  Literature: 1041 (20.8%)
+  History: 1015 (20.3%)
+  Physics: 1004 (20.1%)
+  Mathematics: 991 (19.8%)
+  Computer Science: 949 (19.0%)
+
+Difficulty distribution:
+  hard: 1696 (33.9%)
+  easy: 1665 (33.3%)
+  medium: 1639 (32.8%)
+
+Quality difference analysis:
+  Average: 0.340
+  Std: 0.206
+  Min: 0.000, Max: 0.875
+
+=== Starting Paired Filtering Pipeline ===
+Original data - SFT: 5000, Preference: 5000
+Created 5000 data pairs
+Scored and ranked 5000 pairs
+Selected top 3000 pairs
+
+=== Validation Results ===
+SFT samples: 3000
+Preference samples: 3000
+Average quality score: 0.502
+Min quality score: 0.475
+Max quality score: 0.857
+
+Topic distribution:
+  Literature: 662 samples (22.1%)
+  History: 629 samples (21.0%)
+  Physics: 593 samples (19.8%)
+  Mathematics: 585 samples (19.5%)
+  Computer Science: 531 samples (17.7%)
+Difficulty distribution:
+  medium: 1636 samples (54.5%)
+  easy: 1362 samples (45.4%)
+  hard: 2 samples (0.1%)
+
+Filtered data saved:
+SFT data: /Users/benxiang/Desktop/高级自然语言处理/proj/Edu-Copilot/data/filtered_sft_data.json (3000 samples)
+Preference data: /Users/benxiang/Desktop/高级自然语言处理/proj/Edu-Copilot/data/filtered_preference_data.json (3000 samples)
+
+=== Filtering Complete ===
+Successfully filtered to exactly 3000 paired samples
+SFT: 3000 samples, Preference: 3000 samples

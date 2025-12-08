@@ -226,6 +226,10 @@ Please provide a comprehensive, well-structured response that is appropriate for
         instruction = instruction.replace("{concept}", concept)
         if "{concept1}" in instruction and "{concept2}" in instruction:
             instruction = instruction.replace("{concept1}", concept).replace("{concept2}", concept2)
+        if "{question}" in instruction:
+            instruction = instruction.replace("{question}", random.choice(topic_info["questions"]))
+        if "{problem}" in instruction:
+            instruction = instruction.replace("{problem}", random.choice(topic_info["problems"]))
         instruction = instruction.replace("{topic}", topic)
 
         # Add difficulty prefix
@@ -266,23 +270,113 @@ Please provide a comprehensive, well-structured response that is appropriate for
             "template_type": seed_template["instruction"][:20] + "..."
         }
 
-    def generate_sft_data(self, num_samples: int) -> List[Dict[str, Any]]:
+    def save_single_sample(self, sample: Dict[str, Any], jsonl_filepath: str, json_filepath: str, all_samples: List[Dict[str, Any]]):
         '''
-        Generate specified number of SFT data samples
+        Save a single sample to both JSONL and JSON files
         '''
-        sft_data = []
-        for i in tqdm(range(num_samples)):
-            print(f"Generated {i + 1}/{num_samples} samples...")
+        # Create directory if not exists
+        directory = os.path.dirname(jsonl_filepath)
+        if directory and not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
+        
+        # Append to JSONL file
+        with open(jsonl_filepath, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(sample, ensure_ascii=False) + '\n')
+        
+        # Save complete dataset to JSON file
+        with open(json_filepath, 'w', encoding='utf-8') as f:
+            json.dump(all_samples, f, ensure_ascii=False, indent=2)
 
+    def load_existing_samples(self, filepath: str) -> List[Dict[str, Any]]:
+        '''
+        Load existing samples from JSONL file
+        '''
+        samples = []
+        if os.path.exists(filepath):
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        if line.strip():
+                            samples.append(json.loads(line.strip()))
+                print(f"Loaded {len(samples)} existing samples from {filepath}")
+            except Exception as e:
+                print(f"Error loading existing samples: {e}")
+        return samples
+
+    def clear_existing_data(self, jsonl_filepath: str, json_filepath: str):
+        '''
+        Clear existing data files
+        '''
+        files_cleared = []
+        
+        if os.path.exists(jsonl_filepath):
+            os.remove(jsonl_filepath)
+            files_cleared.append(jsonl_filepath)
+            
+        if os.path.exists(json_filepath):
+            os.remove(json_filepath)
+            files_cleared.append(json_filepath)
+            
+        if files_cleared:
+            print(f"Cleared existing data files: {', '.join(files_cleared)}")
+        else:
+            print("No existing data files found to clear")
+
+    def generate_sft_data(self, num_samples: int, jsonl_filepath: str, json_filepath: str, overwrite: bool = False) -> Dataset:
+        '''
+        Generate specified number of SFT data samples and save incrementally
+        
+        Args:
+            num_samples: Total number of samples to generate
+            jsonl_filepath: Path to save the JSONL file
+            json_filepath: Path to save the JSON file
+            overwrite: Whether to overwrite existing data (True) or continue from existing (False)
+        '''
+        # Clear existing data if overwrite is True
+        if overwrite:
+            self.clear_existing_data(jsonl_filepath, json_filepath)
+            existing_samples = []
+            existing_count = 0
+        else:
+            # Load existing samples if file exists
+            existing_samples = self.load_existing_samples(jsonl_filepath)
+            existing_count = len(existing_samples)
+        
+        # Calculate how many more samples we need
+        remaining_samples = max(0, num_samples - existing_count)
+        
+        if remaining_samples == 0:
+            print(f"Target number of samples ({num_samples}) already reached in {jsonl_filepath}")
+            return Dataset.from_list(existing_samples)
+        
+        print(f"Found {existing_count} existing samples, generating {remaining_samples} more samples...")
+        
+        # Progress bar for new samples
+        progress_bar = tqdm(total=remaining_samples, desc="Generating samples")
+        
+        # Start from existing count
+        current_samples = existing_samples.copy()
+        
+        for i in range(remaining_samples):
             try:
                 sample = self.generate_single_sample()
-                sft_data.append(sample)
+                current_samples.append(sample)
+                
+                # Save immediately to both JSONL and JSON files
+                self.save_single_sample(sample, jsonl_filepath, json_filepath, current_samples)
+                
+                # Update progress
+                progress_bar.update(1)
+                progress_bar.set_description(f"Generated {i+1+existing_count}/{num_samples} samples")
+                
             except Exception as e:
-                print(f"Error generating sample {i+1}: {e}")
+                print(f"Error generating sample {i+1+existing_count}: {e}")
                 continue
 
+        progress_bar.close()
+        
         # Convert to HuggingFace Dataset format
-        dataset = Dataset.from_list(sft_data)
+        dataset = Dataset.from_list(current_samples)
 
         # Print Statistics
         self._print_statistics(dataset)
@@ -326,33 +420,6 @@ Please provide a comprehensive, well-structured response that is appropriate for
         print(f"\nAverage instruction length: {avg_instruction_len:.1f} characters")
         print(f"Average output length: {avg_output_len:.1f} characters")
 
-    def save_dataset(self, dataset: Dataset, filepath: str = "edu_copilot_sft_data.json"):
-        '''
-        Save the dataset to a JSON file
-        '''
-        # Create directory if not exists
-        directory = os.path.dirname(filepath)
-        if directory and not os.path.exists(directory):
-            os.makedirs(directory, exist_ok=True)
-            print(f"Created directory: {directory}")
-        
-        # Convert to list of dictionaries
-        data_list = dataset.to_list()
-        
-        # Save as JSON file
-        with open(filepath, 'w', encoding='utf-8') as f:
-            json.dump(data_list, f, ensure_ascii=False, indent=2)
-        
-        print(f"\nDataset saved to: {filepath}")
-        
-        # Also save as JSONL format (for easier processing)
-        jsonl_filepath = filepath.replace('.json', '.jsonl')
-        with open(jsonl_filepath, 'w', encoding='utf-8') as f:
-            for item in data_list:
-                f.write(json.dumps(item, ensure_ascii=False) + '\n')
-        
-        print(f"Also saved as JSONL format: {jsonl_filepath}")
-
 def get_project_root():
     """
     Get the project root directory based on the current file location
@@ -361,9 +428,12 @@ def get_project_root():
     project_root = os.path.dirname(os.path.dirname(current_dir))
     return project_root
 
-def main():
+def main(overwrite: bool = False):
     '''
-    Generate SFT dataset using API
+    Generate SFT dataset using API with incremental saving
+    
+    Args:
+        overwrite: Whether to overwrite existing data (True) or continue from existing (False)
     '''
     # Initialize generator with API credentials
     generator = SFTGenerator(
@@ -371,22 +441,33 @@ def main():
         model=os.environ.get("MODEL_NAME", "deepseek-chat")
     )
 
-    # Generate dataset (start with smaller number for testing)
-    num_samples = 5000
-    print(f"Generating {num_samples} samples using API...")
-    dataset = generator.generate_sft_data(num_samples)
-
-    # Save dataset
+    # Set file paths
     project_root = get_project_root()
-    filepath = os.path.join(project_root, "data", "edu_copilot_sft_data_api.json")
-    generator.save_dataset(dataset, filepath)
+    jsonl_filepath = os.path.join(project_root, "data", "edu_copilot_sft_data.jsonl")
+    json_filepath = os.path.join(project_root, "data", "edu_copilot_sft_data.json")
+
+    # Generate dataset with incremental saving
+    num_samples = 5000
+    mode = "OVERWRITE" if overwrite else "CONTINUE"
+    print(f"Generating {num_samples} samples using API (mode: {mode})...")
+    dataset = generator.generate_sft_data(num_samples, jsonl_filepath, json_filepath, overwrite=overwrite)
 
     print(f"\n=== Generation Complete ===")
     print(f"Successfully generated {len(dataset)} samples")
+    print(f"Incremental data saved to: {jsonl_filepath}")
+    print(f"Complete dataset saved to: {json_filepath}")
     
     return dataset
 
 if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Generate SFT dataset for educational purposes")
+    parser.add_argument("--overwrite", action="store_true", 
+                       help="Overwrite existing data instead of continuing from existing")
+    
+    args = parser.parse_args()
+    
     print("\n=== Generating Dataset ===")
     print("Note: Make sure DEEPSEEK_API_KEY environment variable is set")
-    main()
+    main(overwrite=args.overwrite)

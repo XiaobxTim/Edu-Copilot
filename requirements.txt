@@ -4,3 +4,4 @@ numpy
 pyarrow
 tqdm
 openai
+sentence-transformers
