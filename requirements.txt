@@ -5,3 +5,5 @@ pyarrow
 tqdm
 openai
 sentence-transformers
+trl
+accelerate

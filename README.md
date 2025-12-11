@@ -20,7 +20,7 @@ EduCopilot is an innovative AI education platform that delivers personalized lea
 ```
 conda create -n <env_name> python=3.10
 conda activate <env_name>
-pip install -r requirements.txt
+pip install -r requirements.txt -i https://pypi.org/simple
 ```
 
 **Check Environment**
@@ -48,10 +48,18 @@ huggingface-cli login --token XXX(your access token)
 ./scripts/run_data_filter.sh
 ```
 
+**Step 2: Model Training**
+```
+chmod +x ./scripts/run_sfttrainer.sh
+
+# SFT Trainer
+./scripts/run_sfttrainer.sh
+```
+
 ## Structure
 
 ```plaintext
-edu-copilot/
+Edu-Copilot/
 |-- README.md
 |-- check_env.py
 |-- requirements.txt
@@ -69,6 +77,7 @@ edu-copilot/
 | | |-- preference_generator.py
 | | |-- data_filter.py
 | |-- model_training/
+| | |-- SFTTrainer.py
 | |-- agents/
 | |-- utils/
 |-- scripts/
@@ -79,6 +88,7 @@ edu-copilot/
 |-- logs/
 | |-- sft_generator.log
 | |-- preference_generator.log
+| |-- sfttrainer.log
 
 ```
 
