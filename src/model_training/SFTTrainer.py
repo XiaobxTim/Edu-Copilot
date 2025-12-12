@@ -201,6 +201,7 @@ class EducationalSFTTrainer:
         """Setting up training arguments with evaluation"""
         DIR = Path(__file__).parent.resolve()
         SAVE_PATH = DIR.parent.parent / 'models' / 'sft_model'
+        SAVE_PATH.mkdir(parents=True, exist_ok=True)
         training_args = TrainingArguments(
             output_dir=str(SAVE_PATH),
             overwrite_output_dir=True,
