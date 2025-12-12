@@ -4,7 +4,7 @@ pyarrow==22.0.0
 tqdm==4.67.1
 openai==2.9.0
 sentence-transformers==5.1.2
-torch==2.1.2
+torch==2.3.0
 transformers==4.46.0
 trl==0.15
 peft==0.10.0

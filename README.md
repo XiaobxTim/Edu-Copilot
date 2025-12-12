@@ -51,9 +51,13 @@ huggingface-cli login --token XXX(your access token)
 **Step 2: Model Training**
 ```
 chmod +x ./scripts/run_sfttrainer.sh
+chmod +x ./scripts/run_sfttrainer.sh
 
 # SFT Trainer
 ./scripts/run_sfttrainer.sh
+
+# DPO Trainer
+./scripts/run_dpotrainer.sh
 ```
 
 ## Structure
