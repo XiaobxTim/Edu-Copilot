@@ -18,7 +18,7 @@ EduCopilot is an innovative AI education platform that delivers personalized lea
 ## Quick Start
 **Environment Setup**
 ```
-conda create -n <env_name> python=3.10
+conda create -n <env_name> python=3.12
 conda activate <env_name>
 pip install -r requirements.txt -i https://pypi.org/simple
 ```
@@ -78,17 +78,24 @@ Edu-Copilot/
 | | |-- data_filter.py
 | |-- model_training/
 | | |-- SFTTrainer.py
+| | |-- DPOTrainer.py
 | |-- agents/
 | |-- utils/
 |-- scripts/
 | |-- run_sft_generator.sh
 | |-- run_preference_generator.sh
+| |-- run_data_filter.sh
+| |-- run_sfttrainer.sh
+| |-- run_dpotrainer.sh
 |-- models/
+| |-- sft_model/best_model
+| |-- dpo_model/best_model
 |-- docs/
 |-- logs/
 | |-- sft_generator.log
 | |-- preference_generator.log
 | |-- sfttrainer.log
+| |-- dpotrainer.log
 
 ```
 
