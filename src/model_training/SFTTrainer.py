@@ -45,7 +45,6 @@ class EducationalSFTTrainer:
         if self.tokenizer.pad_token_id is None:
             self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
         
-        # 设置填充位置
         self.tokenizer.padding_side = "right"
         
         self.model = AutoModelForCausalLM.from_pretrained(
@@ -55,7 +54,6 @@ class EducationalSFTTrainer:
             trust_remote_code=True
         )
         
-        # 启用梯度检查点以节省内存
         self.model.gradient_checkpointing_enable()
         
         logger.info("Model and tokenizer loaded successfully")
@@ -102,7 +100,6 @@ class EducationalSFTTrainer:
         
     def _format_training_text(self, item: dict) -> str:
         """Formatting training text for educational domain"""
-        # 确保数据格式正确
         instruction = item.get("instruction", "")
         input_text = item.get("input", "")
         output = item.get("output", "")
@@ -110,48 +107,71 @@ class EducationalSFTTrainer:
         if not instruction or not output:
             logger.warning(f"Missing instruction or output in item: {item.get('id', 'unknown')}")
             
-        # 合并instruction和input
         if input_text:
             user_message = f"{instruction}\n{input_text}"
         else:
             user_message = instruction
             
-        # 格式化为对话格式
         formatted_text = f"<|im_start|>user\n{user_message}<|im_end|>\n<|im_start|>assistant\n{output}<|im_end|>"
         
         return formatted_text
     
     def compute_metrics(self, eval_pred):
-        """Compute metrics for evaluation"""
+        """Compute accuracy metric - fixed to handle list inputs"""
         predictions, labels = eval_pred
         
-        # 解码预测和标签
-        predictions = np.argmax(predictions, axis=-1)
+        if predictions is None or labels is None:
+            return {"accuracy": 0.0}
         
-        # 计算准确率
+        # Convert predictions to numpy array if it's a list
+        if isinstance(predictions, tuple):
+            predictions = predictions[0]
+        
+        if isinstance(predictions, list):
+            predictions = np.array(predictions)
+        
+        if isinstance(labels, list):
+            labels = np.array(labels)
+        
+        if len(predictions.shape) == 3:
+            predictions = np.argmax(predictions, axis=-1)
+        
+        if predictions.shape != labels.shape:
+            min_shape = min(predictions.shape[-1], labels.shape[-1]) if len(predictions.shape) == len(labels.shape) else -1
+            if min_shape > 0:
+                predictions = predictions[..., :min_shape]
+                labels = labels[..., :min_shape]
+            else:
+                return {"accuracy": 0.0, "error": "shape_mismatch"}
+        
         mask = labels != -100
-        correct = (predictions[mask] == labels[mask]).sum()
-        total = mask.sum()
-        accuracy = correct / total if total > 0 else 0
         
-        metrics = {
-            'accuracy': accuracy,
-        }
+        predictions_flat = predictions[mask].flatten()
+        labels_flat = labels[mask].flatten()
         
-        return metrics
+        if len(predictions_flat) > 0 and len(labels_flat) > 0:
+            min_len = min(len(predictions_flat), len(labels_flat))
+            predictions_flat = predictions_flat[:min_len]
+            labels_flat = labels_flat[:min_len]
+            
+            correct = np.sum(predictions_flat == labels_flat)
+            total = len(predictions_flat)
+            accuracy = float(correct) / float(total) if total > 0 else 0.0
+        else:
+            accuracy = 0.0
+        
+        return {"accuracy": accuracy}
     
     def tokenize_function(self, examples):
         """Tokenize text data"""
-        # 使用tokenizer对文本进行编码
         tokenized = self.tokenizer(
             examples["text"],
             truncation=True,
-            padding=False,  # 设置为False，让SFTTrainer处理填充
-            max_length=512,  # 设置最大长度
-            return_tensors=None,  # 不返回tensor，返回列表
+            padding=False,
+            max_length=128,
+            return_tensors=None, 
         )
         
-        # 设置labels
         tokenized["labels"] = tokenized["input_ids"].copy()
         
         return tokenized
@@ -160,8 +180,7 @@ class EducationalSFTTrainer:
         """Prepare tokenized datasets"""
         if self.train_dataset is None or self.eval_dataset is None:
             raise ValueError("Datasets not loaded")
-            
-        # Tokenize训练集
+        
         tokenized_train = self.train_dataset.map(
             self.tokenize_function,
             batched=True,
@@ -169,7 +188,6 @@ class EducationalSFTTrainer:
             desc="Tokenizing training data"
         )
         
-        # Tokenize评估集
         tokenized_eval = self.eval_dataset.map(
             self.tokenize_function,
             batched=True,
@@ -181,8 +199,10 @@ class EducationalSFTTrainer:
     
     def setup_training_args(self):
         """Setting up training arguments with evaluation"""
+        DIR = Path(__file__).parent.resolve()
+        SAVE_PATH = DIR.parent.parent / 'models' / 'sft_model'
         training_args = TrainingArguments(
-            output_dir="/root/autodl-tmp/sft_model",
+            output_dir=str(SAVE_PATH),
             overwrite_output_dir=True,
             
             # Training parameters
@@ -203,21 +223,27 @@ class EducationalSFTTrainer:
             max_grad_norm=1.0,
             
             # Evaluation
-            evaluation_strategy="epoch",
-            save_strategy="epoch",
+            evaluation_strategy="steps",
+            eval_steps=500,
+            save_strategy="steps",
+            save_steps=500,
             load_best_model_at_end=True,
             metric_for_best_model="loss",
             greater_is_better=False,
             
+            eval_accumulation_steps=1,
+            eval_do_concat_batches=False,
+            
             # Saving
-            save_total_limit=2,
-            save_only_model=True,
+            save_total_limit=3,
+            save_only_model=False,
             
             # Logging
             logging_strategy="steps",
             logging_steps=10,
             logging_first_step=True,
             report_to="none",
+            
         )
         
         return training_args
@@ -240,15 +266,14 @@ class EducationalSFTTrainer:
         )
         
         # Initialize SFT Trainer
-        # 注意：这里直接使用原始的dataset，让SFTTrainer自己处理
         trainer = SFTTrainer(
             model=self.model,
             args=training_args,
-            train_dataset=self.train_dataset,  # 使用原始dataset
-            eval_dataset=self.eval_dataset,    # 使用原始dataset
+            train_dataset=self.train_dataset,
+            eval_dataset=self.eval_dataset,
             tokenizer=self.tokenizer,
-            dataset_text_field="text",  # 指定文本字段
-            max_seq_length=512,  # 设置最大序列长度
+            dataset_text_field="text",
+            max_seq_length=128,
             data_collator=data_collator,
             compute_metrics=self.compute_metrics,
         )
@@ -260,16 +285,17 @@ class EducationalSFTTrainer:
         trainer.train()
         
         # Save the best model
+        DIR = Path(__file__).parent.resolve()
+        SAVE_PATH = DIR.parent.parent / 'models' / 'sft_model' / 'best_model'
+        SAVE_PATH.mkdir(parents=True, exist_ok=True)
         logger.info("Training done, saving best model ...")
-        trainer.save_model("/root/autodl-tmp/best_model")
-        self.tokenizer.save_pretrained("/root/autodl-tmp/best_model")
+        trainer.save_model(str(SAVE_PATH))
+        self.tokenizer.save_pretrained(str(SAVE_PATH))
         
-        # 评估最终模型
+        # Evaluate the final model
         logger.info("Evaluating final model ...")
         eval_results = trainer.evaluate()
         logger.info(f"Final evaluation results: {eval_results}")
-        
-        logger.info(f"Best model saved to: /root/autodl-tmp/best_model")
 
 def main():
     """Main function to run the SFT training"""
@@ -288,18 +314,15 @@ def main():
     # Start training with a small sample first
     logger.info("Starting training with evaluation...")
     
-    # 首先检查数据文件是否存在
     if not os.path.exists(SFT_PATH):
         logger.error(f"Data file not found: {SFT_PATH}")
         return
     
-    # 检查数据格式
     try:
         with open(SFT_PATH, 'r', encoding='utf-8') as f:
             data = json.load(f)
         logger.info(f"Data file loaded successfully, {len(data)} samples found")
         
-        # 检查前几个样本的格式
         for i in range(min(3, len(data))):
             logger.info(f"Sample {i} keys: {list(data[i].keys())}")
             
