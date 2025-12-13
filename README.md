@@ -52,12 +52,17 @@ huggingface-cli login --token XXX(your access token)
 ```
 chmod +x ./scripts/run_sfttrainer.sh
 chmod +x ./scripts/run_sfttrainer.sh
+chmod +x ./scripts/run_eval.sh
 
 # SFT Trainer
 ./scripts/run_sfttrainer.sh
 
 # DPO Trainer
 ./scripts/run_dpotrainer.sh
+
+# Evaluation
+export DEEPSEEK_API_KEY="you api key"
+./scripts/run_eval.sh
 ```
 
 ## Structure
@@ -75,6 +80,8 @@ Edu-Copilot/
 | |-- edu_copilot_preference_data.jsonl
 | |-- filtered_preference_data,json
 | |-- filtered_sft_data.json
+| |-- eval_data.json
+| |-- evaluation_results.json
 |-- src/
 | |-- data_synthesis/
 | | |-- sft_generator.py
@@ -83,6 +90,7 @@ Edu-Copilot/
 | |-- model_training/
 | | |-- SFTTrainer.py
 | | |-- DPOTrainer.py
+| | |-- Evaluation.py
 | |-- agents/
 | |-- utils/
 |-- scripts/
@@ -91,6 +99,7 @@ Edu-Copilot/
 | |-- run_data_filter.sh
 | |-- run_sfttrainer.sh
 | |-- run_dpotrainer.sh
+| |-- run_eval.sh
 |-- models/
 | |-- sft_model/best_model
 | |-- dpo_model/best_model
@@ -100,6 +109,8 @@ Edu-Copilot/
 | |-- preference_generator.log
 | |-- sfttrainer.log
 | |-- dpotrainer.log
+| |-- data_filter.log
+| |-- evaluation.log
 
 ```
 

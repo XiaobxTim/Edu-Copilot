@@ -1,0 +1,47 @@
+[
+    {
+        "id": "quiz_easy_thermo",
+        "prompt": "Generate an 'easy' multiple-choice question for a college physics (Thermodynamics basis) course, and provide four options and the correct answer.",
+        "sft_response": "Generation Failed",
+        "dpo_response": "Generation Failed",
+        "judge_result": {
+            "error": "Generation Failed due to RuntimeError"
+        }
+    },
+    {
+        "id": "explain_hard_quantum",
+        "prompt": "Explain the operating principles and main application scenarios of 'Quantum Annealing' in quantum computing.\nPlease ensure the explanation's difficulty is suitable for master's students who have already mastered basic quantum mechanics.",
+        "sft_response": "Generation Failed",
+        "dpo_response": "Generation Failed",
+        "judge_result": {
+            "error": "Generation Failed due to RuntimeError"
+        }
+    },
+    {
+        "id": "feedback_code_medium",
+        "prompt": "Please review the following Python function, identify any logical errors or inefficient parts, and provide suggestions for improvement.\ndef calculate_average(data_list):\n    total = 0\n    count = 0\n    for item in data_list:\n        total += item\n        count = len(data_list) \n    return total / count",
+        "sft_response": "Generation Failed",
+        "dpo_response": "Generation Failed",
+        "judge_result": {
+            "error": "Generation Failed due to RuntimeError"
+        }
+    },
+    {
+        "id": "quiz_medium_history",
+        "prompt": "Generate a 'medium' difficulty short-answer question for a World Modern History course.\nThe topic is limited to the main characteristics and controversies of globalization in the post-Cold War era.",
+        "sft_response": "Generation Failed",
+        "dpo_response": "Generation Failed",
+        "judge_result": {
+            "error": "Generation Failed due to RuntimeError"
+        }
+    },
+    {
+        "id": "explain_easy_biology",
+        "prompt": "Use clear and easy-to-understand language to explain the main function of the cell nucleus (Nucleus) to a high school student.",
+        "sft_response": "Generation Failed",
+        "dpo_response": "Generation Failed",
+        "judge_result": {
+            "error": "Generation Failed due to RuntimeError"
+        }
+    }
+]

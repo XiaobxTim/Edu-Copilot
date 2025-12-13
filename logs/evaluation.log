@@ -1,0 +1,21 @@
+2025-12-13 16:37:37,038 - INFO - Loading tokenizer from SFT Model Path: /Users/benxiang/Desktop/高级自然语言处理/proj/Edu-Copilot/models/sft_model/best_model
+Special tokens have been added in the vocabulary, make sure the associated word embeddings are fine-tuned or trained.
+2025-12-13 16:37:37,127 - INFO - Loading SFT model from: /Users/benxiang/Desktop/高级自然语言处理/proj/Edu-Copilot/models/sft_model/best_model with dtype: torch.float32
+2025-12-13 16:37:37,745 - INFO - Loading DPO model from: /Users/benxiang/Desktop/高级自然语言处理/proj/Edu-Copilot/models/dpo_model/best_model with dtype: torch.float32
+2025-12-13 16:37:38,168 - INFO - Starting LLM-as-a-Judge evaluation...
+2025-12-13 16:37:38,168 - INFO - --- Sample ID: quiz_easy_thermo ---
+2025-12-13 16:37:38,168 - INFO - Prompt: Generate an 'easy' multiple-choice question for a ...
+2025-12-13 16:37:38,531 - ERROR - Model generation failed (RuntimeError): probability tensor contains either `inf`, `nan` or element < 0
+2025-12-13 16:37:38,531 - INFO - --- Sample ID: explain_hard_quantum ---
+2025-12-13 16:37:38,531 - INFO - Prompt: Explain the operating principles and main applicat...
+2025-12-13 16:37:38,653 - ERROR - Model generation failed (RuntimeError): probability tensor contains either `inf`, `nan` or element < 0
+2025-12-13 16:37:38,654 - INFO - --- Sample ID: feedback_code_medium ---
+2025-12-13 16:37:38,654 - INFO - Prompt: Please review the following Python function, ident...
+2025-12-13 16:37:38,802 - ERROR - Model generation failed (RuntimeError): probability tensor contains either `inf`, `nan` or element < 0
+2025-12-13 16:37:38,803 - INFO - --- Sample ID: quiz_medium_history ---
+2025-12-13 16:37:38,803 - INFO - Prompt: Generate a 'medium' difficulty short-answer questi...
+2025-12-13 16:37:38,915 - ERROR - Model generation failed (RuntimeError): probability tensor contains either `inf`, `nan` or element < 0
+2025-12-13 16:37:38,916 - INFO - --- Sample ID: explain_easy_biology ---
+2025-12-13 16:37:38,916 - INFO - Prompt: Use clear and easy-to-understand language to expla...
+2025-12-13 16:37:39,024 - ERROR - Model generation failed (RuntimeError): probability tensor contains either `inf`, `nan` or element < 0
+2025-12-13 16:37:39,043 - INFO - Evaluation finished! Results saved to: /Users/benxiang/Desktop/高级自然语言处理/proj/Edu-Copilot/data/evaluation_results.json

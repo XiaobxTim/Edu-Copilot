@@ -1,0 +1,32 @@
+[
+    {
+        "id": "quiz_easy_thermo",
+        "prompt": "Generate an 'easy' multiple-choice question for a college physics (Thermodynamics basis) course, and provide four options and the correct answer.",
+        "input": "",
+        "reference": "Please manually fill in a high-quality, accurate, and clearly answered 'easy' thermodynamics multiple-choice question and answer. Example: Which of the following physical quantities remains constant during an isothermal process? A. Volume B. Pressure C. Temperature D. Internal Energy (Correct Answer: C)"
+    },
+    {
+        "id": "explain_hard_quantum",
+        "prompt": "Explain the operating principles and main application scenarios of 'Quantum Annealing' in quantum computing.",
+        "input": "Please ensure the explanation's difficulty is suitable for master's students who have already mastered basic quantum mechanics.",
+        "reference": "Please manually fill in a high-quality explanation that meets the depth and accuracy standards for a graduate student. The content should include the adiabatic theorem, Hamiltonian, quantum fluctuations, and applications in combinatorial optimization and materials science."
+    },
+    {
+        "id": "feedback_code_medium",
+        "prompt": "Please review the following Python function, identify any logical errors or inefficient parts, and provide suggestions for improvement.",
+        "input": "def calculate_average(data_list):\n    total = 0\n    count = 0\n    for item in data_list:\n        total += item\n        count = len(data_list) \n    return total / count",
+        "reference": "Please manually fill in a high-quality feedback. The feedback should point out the error and inefficiency of repeatedly calculating `count = len(data_list)` inside the loop, provide corrected code (moving the count calculation outside the loop or using the built-in `sum()` function), and a concise explanation."
+    },
+    {
+        "id": "quiz_medium_history",
+        "prompt": "Generate a 'medium' difficulty short-answer question for a World Modern History course.",
+        "input": "The topic is limited to the main characteristics and controversies of globalization in the post-Cold War era.",
+        "reference": "Please manually fill in a high-quality short-answer question that covers the key points of the topic, along with the corresponding standard answer or grading points. The difficulty of the question should require students to analyze and list 3-4 main characteristics and controversies."
+    },
+    {
+        "id": "explain_easy_biology",
+        "prompt": "Use clear and easy-to-understand language to explain the main function of the cell nucleus (Nucleus) to a high school student.",
+        "input": "",
+        "reference": "Please manually fill in a high-quality, accessible yet scientifically accurate high school level explanation. The content should focus on the nucleus as the center for storing genetic material and controlling cell activities."
+    }
+]
