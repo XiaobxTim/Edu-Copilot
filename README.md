@@ -7,12 +7,48 @@ EduCopilot is an innovative AI education platform that delivers personalized lea
   - [Introduction](#introduction)
     - [Core Feature](#core-feature)
     - [System Architecture​](#system-architecture)
+    - [Core Feature](#core-feature-1)
+    - [System Architecture​](#system-architecture-1)
   - [Quick Start](#quick-start)
   - [Structure](#structure)
   - [Acknowledgements](#acknowledgements)
   - [Citation](#citation)
 
 ## Introduction
+
+EduCopilot is an advanced AI-driven educational platform designed to simulate a comprehensive tutoring environment. Unlike traditional rule-based systems, EduCopilot leverages the power of Large Language Models (LLMs) to construct a **Multi-Agent System** that acts as tutors, evaluators, and curriculum planners.
+
+The project implements a complete lifecycle for educational LLMs: from **synthetic data generation** and **quality filtering** to **supervised fine-tuning (SFT)** and **direct preference optimization (DPO)**. By integrating state-of-the-art alignment techniques, EduCopilot ensures that the model not only understands educational content but also aligns with pedagogical preferences to deliver personalized and adaptive learning experiences.
+
+### Core Feature
+
+* **🤖 Multi-Agent Instructional Framework**
+Deploys specialized agents (e.g., *Instructional Designer*, *Tutor*, *Evaluator*) that collaborate to analyze student needs, generate tailored learning plans, and provide real-time feedback, simulating a 1-on-1 human tutoring experience.
+* **🔄 Self-Evolving Data Pipeline**
+Features a robust data synthesis engine that autonomously generates high-quality instruction sets (`sft_generator`) and preference pairs (`preference_generator`). It utilizes automated filtering (`data_filter`) to ensure the training data maintains high pedagogical standards before feeding into the model.
+* **🎯 Preference-Aligned Model Training**
+Goes beyond standard fine-tuning by implementing **Direct Preference Optimization (DPO)**. This ensures the educational model is aligned with human-preferred teaching styles—favoring encouraging, clear, and step-by-step guidance over generic responses.
+* **📈 Dynamic Difficulty & Evaluation**
+The system continuously evaluates student performance and dynamically adjusts the complexity of exercises and explanations, ensuring the learner stays in their "Zone of Proximal Development."
+
+### System Architecture​
+
+The EduCopilot architecture consists of three interconnected stages that form a closed-loop system for building and deploying educational AI:
+
+1. **Data Synthesis & Filtering Layer**
+* Leverages foundation models (e.g., DeepSeek) to synthesize diverse educational scenarios and dialogue pairs.
+* Applies a rigorous **Filter Mechanism** to remove low-quality or hallucinated content, ensuring a clean dataset for training.
+
+
+2. **Model Alignment Layer**
+* **SFT (Supervised Fine-Tuning):** Instills domain-specific educational knowledge into the base model.
+* **DPO (Direct Preference Optimization):** Refines the model's behavior using synthesized preference data (chosen vs. rejected responses) to minimize harmful or unhelpful tutoring outputs.
+
+
+3. **Agent Application Layer**
+* The aligned model serves as the brain for the **Multi-Agent System**.
+* Agents interact with users via the environment, executing the customized lesson plans and processing user feedback in real-time.
+
 ### Core Feature
 ### System Architecture​
 ## Quick Start
