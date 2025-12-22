@@ -9,3 +9,4 @@ EduCopilot
 
 from . import data_synthesis
 from . import model_training
+from . import agent

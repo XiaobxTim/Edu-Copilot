@@ -65,6 +65,16 @@ export DEEPSEEK_API_KEY="you api key"
 ./scripts/run_eval.sh
 ```
 
+**Step 3: Multi-Agent System**
+```
+chmod +x ./scripts/run_multi_agent.sh
+
+# Usage of Multi-Agent System
+# Remember to modify bash to generate different plans
+export DEEPSEEK_API_KEY="you api key"
+./scripts/run_multi_agent.sh
+```
+
 ## Structure
 
 ```plaintext
@@ -72,7 +82,6 @@ Edu-Copilot/
 |-- README.md
 |-- check_env.py
 |-- requirements.txt
-|-- configs/
 |-- data/
 | |-- edu_copilot_sft_data.json
 | |-- edu_copilot_sft_data.jsonl
@@ -92,7 +101,8 @@ Edu-Copilot/
 | | |-- DPOTrainer.py
 | | |-- Evaluation.py
 | |-- agents/
-| |-- utils/
+| | |-- multi-agent.py
+| |-- __init__.py
 |-- scripts/
 | |-- run_sft_generator.sh
 | |-- run_preference_generator.sh
@@ -100,10 +110,10 @@ Edu-Copilot/
 | |-- run_sfttrainer.sh
 | |-- run_dpotrainer.sh
 | |-- run_eval.sh
+| |-- run_multi_agent.sh
 |-- models/
 | |-- sft_model/best_model
 | |-- dpo_model/best_model
-|-- docs/
 |-- logs/
 | |-- sft_generator.log
 | |-- preference_generator.log
